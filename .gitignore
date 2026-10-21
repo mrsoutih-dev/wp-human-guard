@@ -1,0 +1,26 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build / Dependency files
+node_modules/
+vendor/
+composer.lock
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Archives
+*.zip
+*.tar.gz

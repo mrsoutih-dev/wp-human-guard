@@ -1,0 +1,15 @@
+{
+    "name": "etadrib/etadrib-human-guard",
+    "description": "Advanced multi-layer anti-bot and registration protection plugin for WordPress, Tutor LMS, and WooCommerce.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Etadrib Security Engineering Team",
+            "homepage": "https://etadrib.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    }
+}

@@ -1,0 +1,61 @@
+/**
+ * Etadrib Human Guard Stylesheet
+ */
+
+/* Invisible Honeypot Trap - 100% hidden from human visitors */
+.et-guard-hp-wrap {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    clip: rect(0, 0, 0, 0) !important;
+}
+
+/* Math Challenge Box */
+.et-guard-math-container {
+    margin: 16px 0 20px !important;
+    padding: 14px 16px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+}
+
+.et-guard-math-container label {
+    display: block !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin-bottom: 8px !important;
+    line-height: 1.5 !important;
+}
+
+.et-guard-math-container input[type="number"],
+.et-guard-math-container input.input {
+    width: 110px !important;
+    padding: 8px 12px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    font-size: 16px !important;
+    text-align: center !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.et-guard-math-container input[type="number"]:focus,
+.et-guard-math-container input.input:focus {
+    border-color: #0284c7 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2) !important;
+}
+
+/* Admin Styling Enhancements */
+.et-guard-admin-wrap table.wp-list-table th {
+    font-weight: 700 !important;
+}
