@@ -1,5 +1,5 @@
-=== Etadrib Human Guard ===
-Contributors: etadrib
+=== HumanGuard - Anti-Bot & Registration Security ===
+Contributors: zohodigital
 Tags: anti-bot, spam protection, registration guard, honeypot, security, tutor lms, woocommerce
 Requires at least: 5.8
 Tested up to: 7.1
@@ -8,11 +8,11 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Advanced multi-layer anti-bot & human verification system for WordPress, Tutor LMS, and WooCommerce.
+Advanced multi-layer anti-bot & human verification system for WordPress, Tutor LMS, and WooCommerce. Built by zohodigital.com.
 
 == Description ==
 
-Etadrib Human Guard is an advanced WordPress security plugin designed to eliminate bot registrations, credential stuffing brute-force attacks, and XML-RPC exploits.
+HumanGuard is a production-grade WordPress security plugin built by zohodigital.com to eliminate bot registrations, credential stuffing brute-force attacks, and XML-RPC exploits.
 
 = Features =
 * Invisible Honeypot Trap
@@ -27,9 +27,9 @@ Etadrib Human Guard is an advanced WordPress security plugin designed to elimina
 
 == Installation ==
 
-1. Upload the `etadrib-human-guard` folder to the `/wp-content/plugins/` directory.
+1. Upload the `wp-human-guard` folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Access configuration via 'حارس إتدريب (Guard)' in your admin menu.
+3. Access configuration via 'HumanGuard' in your admin menu.
 
 == Frequently Asked Questions ==
 
@@ -39,4 +39,4 @@ Yes! Out of the box, all core features (Honeypot, Time Trap, Dynamic JS Token, a
 == Changelog ==
 
 = 1.0.0 =
-* Initial public release.
+* Initial public release by zohodigital.com.

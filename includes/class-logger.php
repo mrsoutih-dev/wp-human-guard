@@ -3,11 +3,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Etadrib_Guard_Logger {
+class Human_Guard_Logger {
 
     public static function get_table_name() {
         global $wpdb;
-        return $wpdb->prefix . 'etadrib_bot_logs';
+        return $wpdb->prefix . 'human_guard_bot_logs';
     }
 
     public static function create_table() {
@@ -33,8 +33,8 @@ class Etadrib_Guard_Logger {
         dbDelta($sql);
 
         // Initialize stats if not present
-        if (!get_option('etadrib_guard_stats')) {
-            update_option('etadrib_guard_stats', [
+        if (!get_option('human_guard_stats')) {
+            update_option('human_guard_stats', [
                 'total_blocked_regs'   => 0,
                 'total_blocked_logins' => 0,
                 'total_blocked_xmlrpc' => 0,
@@ -68,7 +68,7 @@ class Etadrib_Guard_Logger {
         );
 
         // Update stats
-        $stats = get_option('etadrib_guard_stats', [
+        $stats = get_option('human_guard_stats', [
             'total_blocked_regs'   => 0,
             'total_blocked_logins' => 0,
             'total_blocked_xmlrpc' => 0,
@@ -87,7 +87,7 @@ class Etadrib_Guard_Logger {
         }
 
         $stats['last_blocked_at'] = current_time('mysql');
-        update_option('etadrib_guard_stats', $stats, false);
+        update_option('human_guard_stats', $stats, false);
 
         // Auto prune if over 1500 logs (1 in 50 chance to avoid overhead)
         if (mt_rand(1, 50) === 1) {
@@ -103,7 +103,7 @@ class Etadrib_Guard_Logger {
     }
 
     public static function get_stats() {
-        return get_option('etadrib_guard_stats', [
+        return get_option('human_guard_stats', [
             'total_blocked_regs'   => 0,
             'total_blocked_logins' => 0,
             'total_blocked_xmlrpc' => 0,

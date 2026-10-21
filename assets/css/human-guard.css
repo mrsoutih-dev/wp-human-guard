@@ -1,8 +1,10 @@
 /**
- * Etadrib Human Guard Stylesheet
+ * HumanGuard - Anti-Bot & Registration Security
+ * Author: zohodigital.com
  */
 
 /* Invisible Honeypot Trap - 100% hidden from human visitors */
+.hg-guard-hp-wrap,
 .et-guard-hp-wrap {
     position: absolute !important;
     left: -9999px !important;
@@ -16,6 +18,7 @@
 }
 
 /* Math Challenge Box */
+.hg-guard-math-container,
 .et-guard-math-container {
     margin: 16px 0 20px !important;
     padding: 14px 16px !important;
@@ -25,6 +28,7 @@
     box-sizing: border-box !important;
 }
 
+.hg-guard-math-container label,
 .et-guard-math-container label {
     display: block !important;
     font-size: 14px !important;
@@ -34,6 +38,8 @@
     line-height: 1.5 !important;
 }
 
+.hg-guard-math-container input[type="number"],
+.hg-guard-math-container input.input,
 .et-guard-math-container input[type="number"],
 .et-guard-math-container input.input {
     width: 110px !important;
@@ -48,6 +54,8 @@
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
 }
 
+.hg-guard-math-container input[type="number"]:focus,
+.hg-guard-math-container input.input:focus,
 .et-guard-math-container input[type="number"]:focus,
 .et-guard-math-container input.input:focus {
     border-color: #0284c7 !important;
@@ -56,6 +64,7 @@
 }
 
 /* Admin Styling Enhancements */
+.hg-guard-admin-wrap table.wp-list-table th,
 .et-guard-admin-wrap table.wp-list-table th {
     font-weight: 700 !important;
 }

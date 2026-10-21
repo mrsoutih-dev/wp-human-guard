@@ -1,11 +1,12 @@
-# Etadrib Human Guard (حارس إتدريب)
+# HumanGuard (درع الحماية)
 
 [![WordPress Tested](https://img.shields.io/badge/WordPress-6.0%2B-blue.svg)](https://wordpress.org)
 [![PHP Version](https://img.shields.io/badge/PHP-7.4%2B%20%7C%208.x-purple.svg)](https://php.net)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-green.svg)](LICENSE)
 [![Security](https://img.shields.io/badge/Anti--Bot-Multi--Layer-red.svg)](#features)
+[![Builder](https://img.shields.io/badge/Built%20By-zohodigital.com-0284c7.svg)](https://zohodigital.com)
 
-**Etadrib Human Guard** is an advanced, production-grade anti-bot security plugin engineered for WordPress. It eliminates automated bot registrations, brute-force credential stuffing, and XML-RPC exploits while maintaining a seamless, accessible user experience for legitimate humans.
+**HumanGuard** is an advanced, production-grade anti-bot security plugin engineered for WordPress by [zohodigital.com](https://zohodigital.com). It eliminates automated bot registrations, brute-force credential stuffing, and XML-RPC exploits while maintaining a seamless, accessible user experience for legitimate humans.
 
 Designed with native compatibility for **WordPress Core**, **Tutor LMS**, and **WooCommerce**, featuring a bilingual Arabic/English management dashboard.
 
@@ -33,19 +34,19 @@ flowchart TD
 ```
 
 ### 1. Invisible Honeypot Trap
-Dynamic decoy fields positioned far outside the viewport (`et_user_website_hp`). Real human users never see or interact with these fields, but automated spam bots fill them automatically. Submissions containing values in honeypot fields are dropped instantly.
+Dynamic decoy fields positioned far outside the viewport (`hg_user_website_hp`). Real human users never see or interact with these fields, but automated spam bots fill them automatically. Submissions containing values in honeypot fields are dropped instantly.
 
 ### 2. Form Submission Time Trap (Speed Limit)
-Automated scripts submit forms within milliseconds. Etadrib Human Guard embeds an HMAC-signed timestamp token on render. Submissions completed in under 2 seconds or replayed after token expiration are rejected.
+Automated scripts submit forms within milliseconds. HumanGuard embeds an HMAC-signed timestamp token on render. Submissions completed in under 2 seconds or replayed after token expiration are rejected.
 
 ### 3. Dynamic JavaScript Browser Execution Proof
-Automated tools like `curl`, Python `requests`, or scrapers lack interactive browser execution. Etadrib Human Guard executes a dynamic, lightweight client script that computes a challenge response token upon page interaction.
+Automated tools like `curl`, Python `requests`, or scrapers lack interactive browser execution. HumanGuard executes a dynamic, lightweight client script that computes a challenge response token upon page interaction.
 
 ### 4. Interactive Human Math Verification
 A clean, accessible math challenge (e.g., `3 + 5 = ?`) presented with Arabic & English labels. Operands are randomized and answer validation is verified server-side with HMAC cryptographic signing.
 
 ### 5. Disposable Email & Bot Pattern Blacklist
-Instantly rejects known disposable/temporary email domains (`@example.*`, `@formtests.info`, `@mailinator.com`, `@tempmail.com`), as well as dot-stuffing patterns in email addresses (`e.ri.c.e.w.b.5969@gmail.com`) used by botnets.
+Instantly rejects known disposable/temporary email domains (`@example.*`, `@formtests.info`, `@mailinator.com`, `@tempmail.com`), as well as dot-stuffing patterns in email addresses used by botnets.
 
 ### 6. Brute Force Protection & Rate Limiting
 - **Registration Limiting**: Caps registration attempts from the same IP to 3 attempts per 30 minutes.
@@ -68,7 +69,7 @@ Blocks direct hits to `xmlrpc.php` and disables XML-RPC APIs, stopping pingback 
 
 ## 🖥️ WordPress Admin Dashboard
 
-Under **WP Admin ➔ حارس إتدريب (Guard)**:
+Under **WP Admin ➔ HumanGuard**:
 - **نظرة عامة (Overview)**: Real-time security telemetry showing total neutralized threats, blocked bot registrations, brute-force lockouts, and blocked XML-RPC hits.
 - **تنظيف الحسابات الوهمية (Bot Account Cleaner)**: Intelligent heuristic scanner that detects bot accounts and provides a 1-click safe bulk deletion tool (Administrators and Instructors are protected).
 - **سجل الهجمات (Attack Logs)**: Live audit log showing IP addresses, timestamps, attack vectors, user agents, and block reasons.
@@ -81,19 +82,19 @@ Under **WP Admin ➔ حارس إتدريب (Guard)**:
 ### Method 1: Manual Installation
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/etadrib-human-guard.git
+   git clone https://github.com/mrsoutih-dev/wp-human-guard.git
    ```
-2. Upload the `etadrib-human-guard` folder to your WordPress plugins directory:
+2. Upload the `wp-human-guard` folder to your WordPress plugins directory:
    ```
-   wp-content/plugins/etadrib-human-guard/
+   wp-content/plugins/wp-human-guard/
    ```
 3. Activate the plugin via **WP Admin ➔ Plugins** or using WP-CLI:
    ```bash
-   wp plugin activate etadrib-human-guard
+   wp plugin activate wp-human-guard
    ```
 
 ### Method 2: Zip Archive
-1. Compress the plugin folder into `etadrib-human-guard.zip`.
+1. Compress the plugin folder into `wp-human-guard.zip`.
 2. Go to **WP Admin ➔ Plugins ➔ Add New ➔ Upload Plugin**.
 3. Choose the `.zip` file and click **Install Now**, then **Activate Plugin**.
 
@@ -113,26 +114,12 @@ All features work out of the box with zero external configuration required. Defa
 
 ---
 
-## 🔒 Security Best Practices
-
-For servers running **LiteSpeed / Apache / CyberPanel**, add the following rule to your `.htaccess` to block XML-RPC at the web server layer before requests reach PHP:
-
-```apache
-# Block XML-RPC Access
-<Files xmlrpc.php>
-Order Deny,Allow
-Deny from all
-</Files>
-```
-
----
-
 ## 📄 License
 
 This project is licensed under the **GNU General Public License v2.0 or later** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👥 Authors & Credits
+## 👥 Builder & Founder
 
-Developed with ❤️ by the **Etadrib Security Engineering Team** for [Etadrib.com](https://etadrib.com).
+Designed and engineered with ❤️ by **[zohodigital.com](https://zohodigital.com)**.

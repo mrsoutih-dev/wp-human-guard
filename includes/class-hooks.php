@@ -3,10 +3,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Etadrib_Guard_Hooks {
+class Human_Guard_Hooks {
 
     public static function init() {
-        $settings = Etadrib_Guard_Core::get_settings();
+        $settings = Human_Guard_Core::get_settings();
 
         // 1. XML-RPC Blocker
         if (!empty($settings['block_xmlrpc'])) {
@@ -46,21 +46,21 @@ class Etadrib_Guard_Hooks {
 
     public static function enqueue_assets() {
         wp_register_style(
-            'etadrib-guard-css',
-            ETADRIB_GUARD_URL . 'assets/css/etadrib-guard.css',
+            'human-guard-css',
+            HUMAN_GUARD_URL . 'assets/css/human-guard.css',
             [],
-            ETADRIB_GUARD_VERSION
+            HUMAN_GUARD_VERSION
         );
-        wp_enqueue_style('etadrib-guard-css');
+        wp_enqueue_style('human-guard-css');
 
         wp_register_script(
-            'etadrib-guard-js',
-            ETADRIB_GUARD_URL . 'assets/js/etadrib-guard.js',
+            'human-guard-js',
+            HUMAN_GUARD_URL . 'assets/js/human-guard.js',
             [],
-            ETADRIB_GUARD_VERSION,
+            HUMAN_GUARD_VERSION,
             true
         );
-        wp_enqueue_script('etadrib-guard-js');
+        wp_enqueue_script('human-guard-js');
     }
 
     /* ── XML-RPC Protection ────────────────────────────────────────── */
@@ -70,10 +70,9 @@ class Etadrib_Guard_Hooks {
         remove_action('wp_head', 'rsd_link');
         remove_action('wp_head', 'wlwmanifest_link');
 
-        // Immediate intercept if accessing xmlrpc.php directly
         $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         if (defined('XMLRPC_REQUEST') || stripos($uri, 'xmlrpc.php') !== false) {
-            Etadrib_Guard_Logger::log('xmlrpc', 'xmlrpc_direct_hit_blocked');
+            Human_Guard_Logger::log('xmlrpc', 'xmlrpc_direct_hit_blocked');
             status_header(403);
             header('Content-Type: text/plain; charset=utf-8');
             header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -84,7 +83,7 @@ class Etadrib_Guard_Hooks {
     /* ── Registration Callbacks ────────────────────────────────────── */
 
     public static function render_registration_fields() {
-        Etadrib_Guard_Core::render_form_fields('registration');
+        Human_Guard_Core::render_form_fields('registration');
     }
 
     public static function validate_registration_errors($errors, $sanitized_user_login, $user_email) {
@@ -93,7 +92,7 @@ class Etadrib_Guard_Hooks {
         }
 
         $identifier = !empty($user_email) ? $user_email : $sanitized_user_login;
-        $check = Etadrib_Guard_Core::verify_submission('registration', $identifier);
+        $check = Human_Guard_Core::verify_submission('registration', $identifier);
 
         if (is_wp_error($check)) {
             $errors->add($check->get_error_code(), $check->get_error_message());
@@ -105,7 +104,7 @@ class Etadrib_Guard_Hooks {
     /* ── Login Callbacks ───────────────────────────────────────────── */
 
     public static function render_login_fields() {
-        Etadrib_Guard_Core::render_form_fields('login');
+        Human_Guard_Core::render_form_fields('login');
     }
 
     public static function validate_login_authenticate($user, $username, $password) {
@@ -113,13 +112,11 @@ class Etadrib_Guard_Hooks {
             return $user;
         }
 
-        // If credentials empty, let WordPress display standard empty field warnings
         if (empty($username) && empty($password)) {
             return $user;
         }
 
-        // If another plugin already returned an error, check if lockout applies
-        $check = Etadrib_Guard_Core::verify_submission('login', $username);
+        $check = Human_Guard_Core::verify_submission('login', $username);
         if (is_wp_error($check)) {
             return $check;
         }
@@ -128,11 +125,11 @@ class Etadrib_Guard_Hooks {
     }
 
     public static function handle_login_failed($username) {
-        Etadrib_Guard_Core::record_failed_login($username);
+        Human_Guard_Core::record_failed_login($username);
     }
 
     public static function handle_login_success($user_login, $user) {
-        Etadrib_Guard_Core::clear_failed_logins();
+        Human_Guard_Core::clear_failed_logins();
     }
 
     /* ── Lost Password Callbacks ───────────────────────────────────── */
@@ -143,7 +140,7 @@ class Etadrib_Guard_Hooks {
         }
 
         $user_data = isset($_POST['user_login']) ? sanitize_text_field(wp_unslash($_POST['user_login'])) : '';
-        $check = Etadrib_Guard_Core::verify_submission('lostpassword', $user_data);
+        $check = Human_Guard_Core::verify_submission('lostpassword', $user_data);
         if (is_wp_error($check)) {
             if (is_wp_error($errors)) {
                 $errors->add($check->get_error_code(), $check->get_error_message());
@@ -163,10 +160,10 @@ class Etadrib_Guard_Hooks {
         }
 
         $email = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
-        $check = Etadrib_Guard_Core::verify_submission('registration', $email);
+        $check = Human_Guard_Core::verify_submission('registration', $email);
 
         if (is_wp_error($check)) {
-            $errors['etadrib_guard'] = $check->get_error_message();
+            $errors['human_guard'] = $check->get_error_message();
         }
 
         return $errors;
@@ -180,7 +177,7 @@ class Etadrib_Guard_Hooks {
         }
 
         $identifier = !empty($email) ? $email : $username;
-        $check = Etadrib_Guard_Core::verify_submission('registration', $identifier);
+        $check = Human_Guard_Core::verify_submission('registration', $identifier);
 
         if (is_wp_error($check)) {
             $errors->add($check->get_error_code(), $check->get_error_message());
@@ -198,7 +195,7 @@ class Etadrib_Guard_Hooks {
             return $validation_error;
         }
 
-        $check = Etadrib_Guard_Core::verify_submission('login', $username);
+        $check = Human_Guard_Core::verify_submission('login', $username);
         if (is_wp_error($check)) {
             return $check;
         }

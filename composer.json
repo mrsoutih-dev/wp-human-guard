@@ -1,12 +1,13 @@
 {
-    "name": "etadrib/etadrib-human-guard",
-    "description": "Advanced multi-layer anti-bot and registration protection plugin for WordPress, Tutor LMS, and WooCommerce.",
+    "name": "zohodigital/wp-human-guard",
+    "description": "Advanced multi-layer anti-bot and registration protection plugin for WordPress, Tutor LMS, and WooCommerce. Built by zohodigital.com.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
+    "homepage": "https://zohodigital.com",
     "authors": [
         {
-            "name": "Etadrib Security Engineering Team",
-            "homepage": "https://etadrib.com"
+            "name": "Zoho Digital",
+            "homepage": "https://zohodigital.com"
         }
     ],
     "require": {

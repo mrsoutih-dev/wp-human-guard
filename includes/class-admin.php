@@ -3,7 +3,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Etadrib_Guard_Admin {
+class Human_Guard_Admin {
 
     public static function init() {
         add_action('admin_menu', [__CLASS__, 'register_admin_menu']);
@@ -13,10 +13,10 @@ class Etadrib_Guard_Admin {
 
     public static function register_admin_menu() {
         add_menu_page(
-            'حارس إتدريب - الحماية ضد البوتات',
-            'حارس إتدريب (Guard)',
+            'HumanGuard - درع الحماية ضد البوتات',
+            'HumanGuard',
             'manage_options',
-            'etadrib-human-guard',
+            'wp-human-guard',
             [__CLASS__, 'render_admin_dashboard'],
             'dashicons-shield-alt',
             80
@@ -24,15 +24,15 @@ class Etadrib_Guard_Admin {
     }
 
     public static function enqueue_admin_assets($hook) {
-        if (strpos($hook, 'etadrib-human-guard') === false) {
+        if (strpos($hook, 'wp-human-guard') === false) {
             return;
         }
 
         wp_enqueue_style(
-            'etadrib-guard-admin-css',
-            ETADRIB_GUARD_URL . 'assets/css/etadrib-guard.css',
+            'human-guard-admin-css',
+            HUMAN_GUARD_URL . 'assets/css/human-guard.css',
             [],
-            ETADRIB_GUARD_VERSION
+            HUMAN_GUARD_VERSION
         );
     }
 
@@ -42,7 +42,7 @@ class Etadrib_Guard_Admin {
         }
 
         // Save Settings
-        if (isset($_POST['et_guard_save_settings']) && check_admin_referer('et_guard_settings_nonce', '_et_nonce')) {
+        if (isset($_POST['hg_guard_save_settings']) && check_admin_referer('hg_guard_settings_nonce', '_hg_nonce')) {
             $settings = [
                 'honeypot_enabled'         => isset($_POST['honeypot_enabled']) ? 1 : 0,
                 'time_trap_enabled'        => isset($_POST['time_trap_enabled']) ? 1 : 0,
@@ -59,27 +59,27 @@ class Etadrib_Guard_Admin {
                 'turnstile_secret_key'     => sanitize_text_field(wp_unslash($_POST['turnstile_secret_key'] ?? '')),
             ];
 
-            Etadrib_Guard_Core::update_settings($settings);
-            wp_safe_redirect(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'settings', 'updated' => '1'], admin_url('admin.php')));
+            Human_Guard_Core::update_settings($settings);
+            wp_safe_redirect(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'settings', 'updated' => '1'], admin_url('admin.php')));
             exit;
         }
 
         // Clear Logs
-        if (isset($_POST['et_guard_clear_logs']) && check_admin_referer('et_guard_clear_logs_nonce', '_et_nonce')) {
-            Etadrib_Guard_Logger::clear_logs();
-            wp_safe_redirect(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'logs', 'cleared' => '1'], admin_url('admin.php')));
+        if (isset($_POST['hg_guard_clear_logs']) && check_admin_referer('hg_guard_clear_logs_nonce', '_hg_nonce')) {
+            Human_Guard_Logger::clear_logs();
+            wp_safe_redirect(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'logs', 'cleared' => '1'], admin_url('admin.php')));
             exit;
         }
 
         // Bulk Delete Suspicious Users
-        if (isset($_POST['et_guard_bulk_delete_users']) && check_admin_referer('et_guard_delete_users_nonce', '_et_nonce')) {
+        if (isset($_POST['hg_guard_bulk_delete_users']) && check_admin_referer('hg_guard_delete_users_nonce', '_hg_nonce')) {
             $user_ids = isset($_POST['selected_users']) && is_array($_POST['selected_users']) ? array_map('intval', $_POST['selected_users']) : [];
             $deleted_count = 0;
 
             require_once ABSPATH . 'wp-admin/includes/user.php';
 
             foreach ($user_ids as $uid) {
-                // ABSOLUTE SECURITY: Never delete administrator, current user, or user ID 1
+                // Never delete administrator, current user, or user ID 1
                 if ($uid === 1 || $uid === get_current_user_id() || user_can($uid, 'manage_options') || user_can($uid, 'tutor_instructor')) {
                     continue;
                 }
@@ -90,7 +90,7 @@ class Etadrib_Guard_Admin {
             }
 
             wp_safe_redirect(add_query_arg([
-                'page' => 'etadrib-human-guard',
+                'page' => 'wp-human-guard',
                 'tab'  => 'cleanup',
                 'deleted' => $deleted_count
             ], admin_url('admin.php')));
@@ -110,16 +110,14 @@ class Etadrib_Guard_Admin {
         ]);
 
         $list = [];
-
         $verified_human_ids = [1, 48, 121, 128, 129, 130];
 
         foreach ($users as $u) {
-            // Never ever touch administrator or instructors
+            // Never touch administrator or instructors
             if ($u->ID === 1 || in_array('administrator', (array)$u->roles, true) || in_array('tutor_instructor', (array)$u->roles, true)) {
                 continue;
             }
 
-            // Explicitly verified human accounts
             $is_verified = in_array($u->ID, $verified_human_ids, true);
             if ($is_verified && $filter !== 'all') {
                 continue;
@@ -146,17 +144,17 @@ class Etadrib_Guard_Admin {
                     $reasons[] = 'اسم مستخدم عشوائي مولّد آلياً (تتالي أحرف ساكنة)';
                 }
 
-                // Mixed uppercase-lowercase long bot strings: e.g. NgsJJtNaWnOBRUhNoKmJRAL
+                // Mixed uppercase-lowercase long bot strings
                 if (preg_match('/[a-z]{2,}[A-Z]{2,}/', $login) && strlen($login) > 12) {
                     $reasons[] = 'اسم مستخدم عشوائي بنمط آلي مختلط';
                 }
 
-                // Pattern firstname.lastname<digits> e.g. emma.smith25102
+                // Pattern firstname.lastname<digits>
                 if (preg_match('/^[a-z]+\.[a-z]+[0-9]{4,6}$/i', $login)) {
                     $reasons[] = 'نمط بوت وهمي لتوليد أسماء مركبة وأرقام عشوائية';
                 }
 
-                // October 2026 bot wave spike check
+                // Check registration spike
                 if (strpos($u->user_registered, '2026-10-') === 0 && !empty($reasons)) {
                     $reasons[] = 'ضمن موجة هجمات أكتوبر 2026';
                 }
@@ -185,28 +183,30 @@ class Etadrib_Guard_Admin {
     public static function render_admin_dashboard() {
         $tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'overview';
         $view_mode = isset($_GET['view']) && $_GET['view'] === 'all' ? 'all' : 'detected';
-        $stats = Etadrib_Guard_Logger::get_stats();
-        $settings = Etadrib_Guard_Core::get_settings();
+        $stats = Human_Guard_Logger::get_stats();
+        $settings = Human_Guard_Core::get_settings();
         $suspicious_users = self::get_suspicious_users($view_mode);
         $total_threats = ($stats['total_blocked_regs'] ?? 0) + ($stats['total_blocked_logins'] ?? 0) + ($stats['total_blocked_xmlrpc'] ?? 0) + ($stats['total_blocked_other'] ?? 0);
 
         ?>
-        <div class="wrap et-guard-admin-wrap" dir="rtl" style="text-align: right; font-family: system-ui, -apple-system, sans-serif;">
+        <div class="wrap hg-guard-admin-wrap" dir="rtl" style="text-align: right; font-family: system-ui, -apple-system, sans-serif;">
             
             <!-- Header -->
-            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 24px 30px; border-radius: 12px; margin: 20px 0 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 24px 30px; border-radius: 12px; margin: 20px 0 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <span class="dashicons dashicons-shield-alt" style="font-size: 42px; width: 42px; height: 42px; color: #38bdf8;"></span>
                         <div>
-                            <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 700;">حارس إتدريب - درع الحماية ضد البوتات والتسجيل الوهمي</h1>
-                            <p style="color: #94a3b8; margin: 5px 0 0; font-size: 14px;">نظام مهندس لحظر هجمات الروبوتات وحصر تسجيل الدخول وإنشاء الحسابات للبشر الحقيقيين فقط.</p>
+                            <h1 style="color: #fff; margin: 0; font-size: 24px; font-weight: 700;">HumanGuard - درع الحماية ضد البوتات والتسجيل الوهمي</h1>
+                            <p style="color: #94a3b8; margin: 5px 0 0; font-size: 14px;">
+                                نظام أمني متقدم لحظر هجمات الروبوتات وحصر تسجيل الدخول وإنشاء الحسابات للبشر الحقيقيين فقط | تم التطوير بواسطة <a href="https://zohodigital.com" target="_blank" style="color: #38bdf8; text-decoration: none; font-weight: 600;">zohodigital.com</a>
+                            </p>
                         </div>
                     </div>
                     <div>
                         <span style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 8px 16px; border-radius: 9999px; font-weight: 600; font-size: 13px; border: 1px solid rgba(16, 185, 129, 0.4);">
                             <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
-                            نظام الحماية الذكي: نَشِط وفعّال
+                            نظام الحماية: نَشِط وفعّال
                         </span>
                     </div>
                 </div>
@@ -223,16 +223,16 @@ class Etadrib_Guard_Admin {
 
             <!-- Navigation Tabs -->
             <h2 class="nav-tab-wrapper" style="margin-bottom: 25px; border-bottom: 2px solid #cbd5e1;">
-                <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'overview'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'overview' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
+                <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'overview'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'overview' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
                     <span class="dashicons dashicons-dashboard" style="vertical-align: middle; margin-left: 5px;"></span> نظرة عامة
                 </a>
-                <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'cleanup'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'cleanup' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
+                <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'cleanup'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'cleanup' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
                     <span class="dashicons dashicons-trash" style="vertical-align: middle; margin-left: 5px;"></span> تنظيف الحسابات الوهمية (<?php echo count($suspicious_users); ?>)
                 </a>
-                <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'logs'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'logs' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
+                <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'logs'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'logs' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
                     <span class="dashicons dashicons-list-view" style="vertical-align: middle; margin-left: 5px;"></span> سجل الهجمات المحظورة
                 </a>
-                <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'settings'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'settings' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
+                <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'settings'], admin_url('admin.php'))); ?>" class="nav-tab <?php echo $tab === 'settings' ? 'nav-tab-active' : ''; ?>" style="font-weight: 600; font-size: 15px; padding: 8px 18px;">
                     <span class="dashicons dashicons-admin-settings" style="vertical-align: middle; margin-left: 5px;"></span> إعدادات الأمان
                 </a>
             </h2>
@@ -278,7 +278,7 @@ class Etadrib_Guard_Admin {
                 <!-- Active Protection Layers Grid -->
                 <div style="background: #fff; padding: 28px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 30px;">
                     <h3 style="margin-top: 0; font-size: 18px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-                        طبقات الحماية النشطة على موقع etadrib.com
+                        طبقات الحماية النشطة بواسطة HumanGuard
                     </h3>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 20px;">
@@ -347,10 +347,10 @@ class Etadrib_Guard_Admin {
                             </p>
                         </div>
                         <div style="display: flex; gap: 8px;">
-                            <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'cleanup', 'view' => 'detected'], admin_url('admin.php'))); ?>" class="button <?php echo $view_mode !== 'all' ? 'button-primary' : ''; ?>">
+                            <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'cleanup', 'view' => 'detected'], admin_url('admin.php'))); ?>" class="button <?php echo $view_mode !== 'all' ? 'button-primary' : ''; ?>">
                                 البوتات المكتشفة تلقائياً (<?php echo count(self::get_suspicious_users('detected')); ?>)
                             </a>
-                            <a href="<?php echo esc_url(add_query_arg(['page' => 'etadrib-human-guard', 'tab' => 'cleanup', 'view' => 'all'], admin_url('admin.php'))); ?>" class="button <?php echo $view_mode === 'all' ? 'button-primary' : ''; ?>">
+                            <a href="<?php echo esc_url(add_query_arg(['page' => 'wp-human-guard', 'tab' => 'cleanup', 'view' => 'all'], admin_url('admin.php'))); ?>" class="button <?php echo $view_mode === 'all' ? 'button-primary' : ''; ?>">
                                 عرض كافة المشتركين للمراجعة
                             </a>
                         </div>
@@ -363,13 +363,13 @@ class Etadrib_Guard_Admin {
                             <p style="color: #64748b; font-size: 13px; margin: 0;">لم يتم العثور على أي حسابات وهمية مشبوهة حالياً.</p>
                         </div>
                     <?php else: ?>
-                        <form method="post" id="et-guard-delete-form" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف الحسابات المحددة نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف فقط حسابات البوتات المحددة.');">
-                            <?php wp_nonce_field('et_guard_delete_users_nonce', '_et_nonce'); ?>
+                        <form method="post" id="hg-guard-delete-form" onsubmit="return confirm('هل أنت متأكد من رغبتك في حذف الحسابات المحددة نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف فقط حسابات البوتات المحددة.');">
+                            <?php wp_nonce_field('hg_guard_delete_users_nonce', '_hg_nonce'); ?>
 
                             <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
-                                <button type="button" class="button" onclick="etSelectAllUsers(true);">تحديد الكل (<?php echo count($suspicious_users); ?>)</button>
-                                <button type="button" class="button" onclick="etSelectAllUsers(false);">إلغاء التحديد</button>
-                                <button type="submit" name="et_guard_bulk_delete_users" class="button button-primary" style="background: #ef4444; border-color: #dc2626; margin-right: auto;">
+                                <button type="button" class="button" onclick="hgSelectAllUsers(true);">تحديد الكل (<?php echo count($suspicious_users); ?>)</button>
+                                <button type="button" class="button" onclick="hgSelectAllUsers(false);">إلغاء التحديد</button>
+                                <button type="submit" name="hg_guard_bulk_delete_users" class="button button-primary" style="background: #ef4444; border-color: #dc2626; margin-right: auto;">
                                     <span class="dashicons dashicons-trash" style="vertical-align: middle; margin-left: 4px;"></span>
                                     حذف الحسابات المحددة نهائياً
                                 </button>
@@ -378,19 +378,25 @@ class Etadrib_Guard_Admin {
                             <table class="wp-list-table widefat fixed striped table-view-list">
                                 <thead>
                                     <tr>
-                                        <th style="width: 40px;"><input type="checkbox" id="et-select-all" onclick="etToggleAll(this);" /></th>
+                                        <th style="width: 40px;"><input type="checkbox" id="hg-select-all" onclick="hgToggleAll(this);" /></th>
                                         <th style="width: 70px;">ID</th>
                                         <th>اسم المستخدم</th>
                                         <th>البريد الإلكتروني</th>
                                         <th>تاريخ التسجيل</th>
                                         <th>الرتبة</th>
-                                        <th>أسباب الاشتباه (بصمة البوت)</th>
+                                        <th>أسباب الاشتباه / حالة الحساب</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($suspicious_users as $su): ?>
                                         <tr>
-                                            <td><input type="checkbox" name="selected_users[]" value="<?php echo esc_attr($su['id']); ?>" class="et-user-chk" checked /></td>
+                                            <td>
+                                                <?php if (!empty($su['is_suspicious'])): ?>
+                                                    <input type="checkbox" name="selected_users[]" value="<?php echo esc_attr($su['id']); ?>" class="hg-user-chk" checked />
+                                                <?php else: ?>
+                                                    <span class="dashicons dashicons-yes-alt" style="color: #10b981;" title="حساب موثق"></span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td><strong>#<?php echo esc_html($su['id']); ?></strong></td>
                                             <td><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;"><?php echo esc_html($su['login']); ?></code></td>
                                             <td><?php echo esc_html($su['email']); ?></td>
@@ -398,9 +404,15 @@ class Etadrib_Guard_Admin {
                                             <td><span class="badge" style="background: #e2e8f0; padding: 3px 8px; border-radius: 4px; font-size: 11px;"><?php echo esc_html($su['roles']); ?></span></td>
                                             <td>
                                                 <?php foreach ($su['reasons'] as $r): ?>
-                                                    <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 2px 7px; border-radius: 4px; font-size: 11px; margin: 1px 2px;">
-                                                        <?php echo esc_html($r); ?>
-                                                    </span>
+                                                    <?php if (strpos($r, 'موثق') !== false): ?>
+                                                        <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 2px 7px; border-radius: 4px; font-size: 11px; margin: 1px 2px; font-weight: 600;">
+                                                            <?php echo esc_html($r); ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 2px 7px; border-radius: 4px; font-size: 11px; margin: 1px 2px;">
+                                                            <?php echo esc_html($r); ?>
+                                                        </span>
+                                                    <?php endif; ?>
                                                 <?php endforeach; ?>
                                             </td>
                                         </tr>
@@ -410,18 +422,19 @@ class Etadrib_Guard_Admin {
                         </form>
 
                         <script>
-                        function etToggleAll(master) {
-                            var chks = document.querySelectorAll('.et-user-chk');
+                        function hgToggleAll(master) {
+                            var chks = document.querySelectorAll('.hg-user-chk');
                             for (var i = 0; i < chks.length; i++) {
                                 chks[i].checked = master.checked;
                             }
                         }
-                        function etSelectAllUsers(val) {
-                            var chks = document.querySelectorAll('.et-user-chk');
+                        function hgSelectAllUsers(val) {
+                            var chks = document.querySelectorAll('.hg-user-chk');
                             for (var i = 0; i < chks.length; i++) {
                                 chks[i].checked = val;
                             }
-                            document.getElementById('et-select-all').checked = val;
+                            var selectAll = document.getElementById('hg-select-all');
+                            if (selectAll) selectAll.checked = val;
                         }
                         </script>
                     <?php endif; ?>
@@ -435,13 +448,13 @@ class Etadrib_Guard_Admin {
                             سجل الهجمات والعمليات الآلية المحظورة
                         </h3>
                         <form method="post" onsubmit="return confirm('هل تريد بالتأكيد مسح كافة السجلات؟');">
-                            <?php wp_nonce_field('et_guard_clear_logs_nonce', '_et_nonce'); ?>
-                            <button type="submit" name="et_guard_clear_logs" class="button">مسح السجل</button>
+                            <?php wp_nonce_field('hg_guard_clear_logs_nonce', '_hg_nonce'); ?>
+                            <button type="submit" name="hg_guard_clear_logs" class="button">مسح السجل</button>
                         </form>
                     </div>
 
                     <?php
-                    $logs = Etadrib_Guard_Logger::get_recent_logs(80);
+                    $logs = Human_Guard_Logger::get_recent_logs(80);
                     if (empty($logs)):
                     ?>
                         <p style="text-align: center; color: #64748b; padding: 40px; background: #f8fafc; border-radius: 8px;">لا توجد هجمات مسجلة بعد. النظام يراقب باستمرار.</p>
@@ -487,11 +500,11 @@ class Etadrib_Guard_Admin {
             <?php elseif ($tab === 'settings'): ?>
                 <div style="background: #fff; padding: 25px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); max-width: 800px;">
                     <h3 style="margin-top: 0; font-size: 18px; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-                        إعدادات أمان التسجيل والدخول
+                        إعدادات أمان التسجيل والدخول (HumanGuard)
                     </h3>
 
                     <form method="post">
-                        <?php wp_nonce_field('et_guard_settings_nonce', '_et_nonce'); ?>
+                        <?php wp_nonce_field('hg_guard_settings_nonce', '_hg_nonce'); ?>
 
                         <table class="form-table">
                             <tr>
@@ -596,11 +609,15 @@ class Etadrib_Guard_Admin {
                         </table>
 
                         <p class="submit" style="margin-top: 25px;">
-                            <button type="submit" name="et_guard_save_settings" class="button button-primary button-large">حفظ الإعدادات</button>
+                            <button type="submit" name="hg_guard_save_settings" class="button button-primary button-large">حفظ الإعدادات</button>
                         </p>
                     </form>
                 </div>
             <?php endif; ?>
+
+            <div style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 13px;">
+                HumanGuard Security System &bull; Designed & Built by <a href="https://zohodigital.com" target="_blank" style="color: #64748b; font-weight: 600; text-decoration: none;">zohodigital.com</a>
+            </div>
 
         </div>
         <?php
