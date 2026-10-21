@@ -111,9 +111,17 @@ class Etadrib_Guard_Admin {
 
         $list = [];
 
+        $verified_human_ids = [1, 48, 121, 128, 129, 130];
+
         foreach ($users as $u) {
             // Never ever touch administrator or instructors
             if ($u->ID === 1 || in_array('administrator', (array)$u->roles, true) || in_array('tutor_instructor', (array)$u->roles, true)) {
+                continue;
+            }
+
+            // Explicitly verified human accounts
+            $is_verified = in_array($u->ID, $verified_human_ids, true);
+            if ($is_verified && $filter !== 'all') {
                 continue;
             }
 
@@ -121,38 +129,42 @@ class Etadrib_Guard_Admin {
             $email = strtolower($u->user_email);
             $login = $u->user_login;
 
-            // Check email domain
-            if (strpos($email, '@example.') !== false || strpos($email, '@formtests.info') !== false) {
-                $reasons[] = 'بريد وهمي تجريبي (@example / formtests)';
+            if (!$is_verified) {
+                // Check email domain
+                if (strpos($email, '@example.') !== false || strpos($email, '@formtests.info') !== false) {
+                    $reasons[] = 'بريد وهمي تجريبي (@example / formtests)';
+                }
+
+                // Dot-stuffing attack in email: e.g. e.duc.ak.oc966
+                $local = strstr($email, '@', true);
+                if ($local && substr_count($local, '.') >= 3) {
+                    $reasons[] = 'نمط نقاط متكررة لتوليد بريد آلي (Dot Stuffing)';
+                }
+
+                // True gibberish: 5+ consecutive consonants (e.g. drhjfpkohi, skmfhlokik)
+                if (preg_match('/[bcdfghjklmnpqrstvwxyz]{5,}/i', $login)) {
+                    $reasons[] = 'اسم مستخدم عشوائي مولّد آلياً (تتالي أحرف ساكنة)';
+                }
+
+                // Mixed uppercase-lowercase long bot strings: e.g. NgsJJtNaWnOBRUhNoKmJRAL
+                if (preg_match('/[a-z]{2,}[A-Z]{2,}/', $login) && strlen($login) > 12) {
+                    $reasons[] = 'اسم مستخدم عشوائي بنمط آلي مختلط';
+                }
+
+                // Pattern firstname.lastname<digits> e.g. emma.smith25102
+                if (preg_match('/^[a-z]+\.[a-z]+[0-9]{4,6}$/i', $login)) {
+                    $reasons[] = 'نمط بوت وهمي لتوليد أسماء مركبة وأرقام عشوائية';
+                }
+
+                // October 2026 bot wave spike check
+                if (strpos($u->user_registered, '2026-10-') === 0 && !empty($reasons)) {
+                    $reasons[] = 'ضمن موجة هجمات أكتوبر 2026';
+                }
+            } else {
+                $reasons[] = 'حساب موثق (إنسان حقيقي)';
             }
 
-            // Dot-stuffing attack in email: e.g. e.duc.ak.oc966
-            $local = strstr($email, '@', true);
-            if ($local && substr_count($local, '.') >= 3) {
-                $reasons[] = 'نمط نقاط متكررة لتوليد بريد آلي (Dot Stuffing)';
-            }
-
-            // Gibberish usernames: 10 lowercase letters e.g. joxxephxyd, nluqkxkmgq
-            if (preg_match('/^[a-z]{8,15}$/', $login) && !preg_match('/[0-9]/', $login)) {
-                $reasons[] = 'اسم مستخدم عشوائي مولّد آلياً';
-            }
-
-            // Mixed uppercase-lowercase long bot strings: e.g. NgsJJtNaWnOBRUhNoKmJRAL
-            if (preg_match('/[a-z]{2,}[A-Z]{2,}/', $login) && strlen($login) > 12) {
-                $reasons[] = 'اسم مستخدم عشوائي بنمط آلي مختلط';
-            }
-
-            // Pattern firstname.lastname<digits> e.g. emma.smith25102
-            if (preg_match('/^[a-z]+\.[a-z]+[0-9]{4,6}$/i', $login)) {
-                $reasons[] = 'نمط بوت وهمي لتوليد أسماء مركبة وأرقام عشوائية';
-            }
-
-            // October 2026 bot wave spike check
-            if (strpos($u->user_registered, '2026-10-') === 0 && !empty($reasons)) {
-                $reasons[] = 'ضمن موجة هجمات أكتوبر 2026';
-            }
-
-            $is_suspicious = !empty($reasons);
+            $is_suspicious = !empty($reasons) && !$is_verified;
 
             if ($filter === 'all' || $is_suspicious) {
                 $list[] = [
