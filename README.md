@@ -8,7 +8,7 @@
 
 **HumanGuard** is an advanced, production-grade anti-bot security plugin engineered for WordPress by [zohodigital.com](https://zohodigital.com). It eliminates automated bot registrations, brute-force credential stuffing, and XML-RPC exploits while maintaining a seamless, accessible user experience for legitimate humans.
 
-Designed with native compatibility for **WordPress Core**, **Tutor LMS**, and **WooCommerce**, featuring a bilingual Arabic/English management dashboard.
+Designed with native compatibility for **WordPress Core**, **Tutor LMS**, **WooCommerce**, and **Contact Form 7**, featuring a bilingual Arabic/English management dashboard.
 
 ---
 
@@ -64,6 +64,7 @@ Blocks direct hits to `xmlrpc.php` and disables XML-RPC APIs, stopping pingback 
 | **WordPress Core** | `/wp-login.php`, custom login URLs (`/login/` via WPS Hide Login), `register_form`, `registration_errors`, `authenticate`, `lostpassword_form` |
 | **Tutor LMS** | Student registration (`/student-registration/`), Instructor registration (`/instructor-registration/`), AJAX endpoints (`tutor_action=tutor_register_student`) |
 | **WooCommerce** | Customer registration form, checkout registration, login validation |
+| **Contact Form 7** | Contact pages (`/contact/`), REST API (`/wp-json/contact-form-7/...`), direct POST bot defense, and members-only email access control |
 
 ---
 

@@ -18,6 +18,8 @@ class Human_Guard_Core {
         'rate_limit_registrations' => 1,     // max 3 registrations per IP per 30 minutes
         'rate_limit_logins'        => 1,     // max 5 failed logins per IP per 15 minutes
         'block_xmlrpc'             => 1,     // block xmlrpc attacks completely
+        'contact_form_protect'     => 1,     // Protect contact forms from bots & unauthorized submissions
+        'contact_form_auth_only'   => 1,     // Restrict contact forms to logged-in approved members only
         'turnstile_enabled'        => 0,
         'turnstile_site_key'       => '',
         'turnstile_secret_key'     => '',

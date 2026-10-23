@@ -54,6 +54,8 @@ class Human_Guard_Admin {
                 'rate_limit_registrations' => isset($_POST['rate_limit_registrations']) ? 1 : 0,
                 'rate_limit_logins'        => isset($_POST['rate_limit_logins']) ? 1 : 0,
                 'block_xmlrpc'             => isset($_POST['block_xmlrpc']) ? 1 : 0,
+                'contact_form_protect'     => isset($_POST['contact_form_protect']) ? 1 : 0,
+                'contact_form_auth_only'   => isset($_POST['contact_form_auth_only']) ? 1 : 0,
                 'turnstile_enabled'        => isset($_POST['turnstile_enabled']) ? 1 : 0,
                 'turnstile_site_key'       => sanitize_text_field(wp_unslash($_POST['turnstile_site_key'] ?? '')),
                 'turnstile_secret_key'     => sanitize_text_field(wp_unslash($_POST['turnstile_secret_key'] ?? '')),
@@ -590,6 +592,24 @@ class Human_Guard_Admin {
                                         <input type="checkbox" name="block_xmlrpc" value="1" <?php checked(1, $settings['block_xmlrpc']); ?> />
                                         إغلاق منفذ xmlrpc.php نهائياً (يوقف هجمات الحرمان من الخدمة والتخمين المستمر).
                                     </label>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th scope="row">حماية نماذج التواصل (Contact Forms)</th>
+                                <td>
+                                    <div style="margin-bottom: 8px;">
+                                        <label>
+                                            <input type="checkbox" name="contact_form_protect" value="1" <?php checked(1, $settings['contact_form_protect']); ?> />
+                                            <strong>تفعيل حماية نماذج التواصل</strong> (حظر محاولات الإرسال الآلية وهجمات POST و REST API المباشرة).
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label>
+                                            <input type="checkbox" name="contact_form_auth_only" value="1" <?php checked(1, $settings['contact_form_auth_only']); ?> />
+                                            <strong>حصر الإرسال على الأعضاء المعتمدين فقط</strong> (منع غير المسجلين من إرسال رسائل بريد للإدارة، وقفل حقول الاسم والبريد ببيانات العضو الحقيقية).
+                                        </label>
+                                    </div>
                                 </td>
                             </tr>
 
